@@ -1,4 +1,4 @@
-use std::println;
+use std::{format, println};
 
 #[derive(Debug)]
 enum Token {
@@ -16,7 +16,7 @@ enum Token {
 }
 
 fn main() {
-    let input = String::from("truetrue");
+    let input = String::from("true, true");
     let tokens = tokenizer(input);
     println!("{:?}", tokens);
 }
@@ -36,55 +36,35 @@ fn tokenizer(input: String) -> Result<Vec<Token>, String> {
             ',' => tokens.push(Token::Comma),
             ':' => tokens.push(Token::Colon),
             't' => {
-                let mut word = vec![character];
-                let mut j = i + 1;
-                let k = j + 3;
-                while j <= k {
-                    if j >= chars.len() && word.len() == 4 {
-                        break;
-                    } else if j >= chars.len() && word.len() != 4 {
+                if chars[i..].starts_with(&['t', 'r', 'u', 'e']) {
+                    if chars.get(i + 4) != Some(&'{')
+                        && chars.get(i + 4) != Some(&'}')
+                        && chars.get(i + 4) != Some(&'[')
+                        && chars.get(i + 4) != Some(&']')
+                        && chars.get(i + 4) != Some(&',')
+                        && chars.get(i + 4) != Some(&':')
+                        && chars.get(i + 4) != Some(&'\n')
+                        && chars.get(i + 4) != Some(&'\t')
+                        && chars.get(i + 4) != Some(&' ')
+                        && chars.get(i + 4) != Some(&'\r')
+                        && chars.get(i + 4) != None
+                    {
                         return Err(format!(
-                            "Yanlış karakter kullanımı veya bilinmeyen token: {}, konum: {}",
-                            character,
+                            "Yanlış karakter kullanımı: {:?}, konum: {}",
+                            chars.get(i + 4),
                             i + 1
                         ));
                     }
-                    let char = chars[j];
-                    if j == (i + 1) && char == 'r' {
-                        word.push(char);
-                    } else if j == (i + 2) && char == 'u' {
-                        word.push(char);
-                    } else if j == (i + 3) && char == 'e' {
-                        word.push(char);
-                        if j == (chars.len() - 1) {
-                            tokens.push(Token::True);
-                            break;
-                        }
-                    } else if j == (i + 4)
-                        && (char == '\n' || char == '\t' || char == '\r' || char == ' ')
-                    {
-                        tokens.push(Token::True);
-                        break;
-                    } else if j == (i + 4)
-                        && (char == ','
-                            || char == ':'
-                            || char == '['
-                            || char == ']'
-                            || char == '{'
-                            || char == '}')
-                    {
-                        tokens.push(Token::True);
-                        break;
-                    } else {
-                        return Err(format!(
-                            "Yanlış karakter kullanımı: {}, konum: {}",
-                            chars[j],
-                            j + 1
-                        ));
-                    };
-                    j += 1;
+                    tokens.push(Token::True);
+                    i += 4;
+                    continue;
+                } else {
+                    return Err(format!(
+                        "Yanlış karakter kullanımı: {:?}, konum: {}",
+                        chars.get(i + 4),
+                        i + 1
+                    ));
                 }
-                i = k - 1;
             }
             ' ' | '\n' | '\t' | '\r' => {
                 i += 1;
