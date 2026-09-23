@@ -16,7 +16,7 @@ enum Token {
 }
 
 fn main() {
-    let input = String::from("true, true");
+    let input = String::from("false, true:null{null}, true:{false}{true,:[]false}}");
     let tokens = tokenizer(input);
     println!("{:?}", tokens);
 }
@@ -56,6 +56,68 @@ fn tokenizer(input: String) -> Result<Vec<Token>, String> {
                         ));
                     }
                     tokens.push(Token::True);
+                    i += 4;
+                    continue;
+                } else {
+                    return Err(format!(
+                        "Yanlış karakter kullanımı: {:?}, konum: {}",
+                        chars.get(i + 4),
+                        i + 1
+                    ));
+                }
+            }
+            'f' => {
+                if chars[i..].starts_with(&['f', 'a', 'l', 's', 'e']) {
+                    if chars.get(i + 5) != Some(&'{')
+                        && chars.get(i + 5) != Some(&'}')
+                        && chars.get(i + 5) != Some(&'[')
+                        && chars.get(i + 5) != Some(&']')
+                        && chars.get(i + 5) != Some(&',')
+                        && chars.get(i + 5) != Some(&':')
+                        && chars.get(i + 5) != Some(&'\n')
+                        && chars.get(i + 5) != Some(&'\t')
+                        && chars.get(i + 5) != Some(&' ')
+                        && chars.get(i + 5) != Some(&'\r')
+                        && chars.get(i + 5) != None
+                    {
+                        return Err(format!(
+                            "Yanlış karakter kullanımı: {:?}, konum: {}",
+                            chars.get(i + 5),
+                            i + 1
+                        ));
+                    }
+                    tokens.push(Token::False);
+                    i += 5;
+                    continue;
+                } else {
+                    return Err(format!(
+                        "Yanlış karakter kullanımı: {:?}, konum: {}",
+                        chars.get(i + 5),
+                        i + 1
+                    ));
+                }
+            }
+            'n' => {
+                if chars[i..].starts_with(&['n', 'u', 'l', 'l']) {
+                    if chars.get(i + 4) != Some(&'{')
+                        && chars.get(i + 4) != Some(&'}')
+                        && chars.get(i + 4) != Some(&'[')
+                        && chars.get(i + 4) != Some(&']')
+                        && chars.get(i + 4) != Some(&',')
+                        && chars.get(i + 4) != Some(&':')
+                        && chars.get(i + 4) != Some(&'\n')
+                        && chars.get(i + 4) != Some(&'\t')
+                        && chars.get(i + 4) != Some(&' ')
+                        && chars.get(i + 4) != Some(&'\r')
+                        && chars.get(i + 4) != None
+                    {
+                        return Err(format!(
+                            "Yanlış karakter kullanımı: {:?}, konum: {}",
+                            chars.get(i + 4),
+                            i + 1
+                        ));
+                    }
+                    tokens.push(Token::Null);
                     i += 4;
                     continue;
                 } else {
