@@ -43,11 +43,7 @@ fn tokenizer(input: &str) -> Result<Vec<Token>, String> {
                     match maybe {
                         Some(c) => {
                             if !STRUCTURAL.contains(&c) && !WHITESPACE.contains(&c) {
-                                return Err(format!(
-                                    "Tanınmayan literal kullanımı: {:?}, konum: {}",
-                                    c,
-                                    i + 5
-                                ));
+                                return Err(format!("true bekleniyordu, konum: {}", i + 1));
                             }
                         }
                         None => {}
@@ -56,11 +52,7 @@ fn tokenizer(input: &str) -> Result<Vec<Token>, String> {
                     i += 4;
                     continue;
                 } else {
-                    return Err(format!(
-                        "Yanlış karakter kullanımı: {:?}, konum: {}",
-                        chars[i..].iter().collect::<String>(),
-                        i + 1
-                    ));
+                    return Err(format!("true bekleniyordu, konum: {}", i + 1));
                 }
             }
             'f' => {
@@ -69,11 +61,7 @@ fn tokenizer(input: &str) -> Result<Vec<Token>, String> {
                     match maybe {
                         Some(c) => {
                             if !STRUCTURAL.contains(&c) && !WHITESPACE.contains(&c) {
-                                return Err(format!(
-                                    "Tanınmayan literal kullanımı: {:?}, konum: {}",
-                                    c,
-                                    i + 6
-                                ));
+                                return Err(format!("false bekleniyordu, konum: {}", i + 1));
                             }
                         }
                         None => {}
@@ -82,11 +70,7 @@ fn tokenizer(input: &str) -> Result<Vec<Token>, String> {
                     i += 5;
                     continue;
                 } else {
-                    return Err(format!(
-                        "Yanlış karakter kullanımı: {:?}, konum: {}",
-                        chars[i..].iter().collect::<String>(),
-                        i + 1
-                    ));
+                    return Err(format!("false bekleniyordu, konum: {}", i + 1));
                 }
             }
             'n' => {
@@ -95,11 +79,7 @@ fn tokenizer(input: &str) -> Result<Vec<Token>, String> {
                     match maybe {
                         Some(c) => {
                             if !STRUCTURAL.contains(&c) && !WHITESPACE.contains(&c) {
-                                return Err(format!(
-                                    "Tanınmayan literal kullanımı: {:?}, konum: {}",
-                                    c,
-                                    i + 5
-                                ));
+                                return Err(format!("null bekleniyordu, konum: {}", i + 1));
                             }
                         }
                         None => {}
@@ -108,11 +88,7 @@ fn tokenizer(input: &str) -> Result<Vec<Token>, String> {
                     i += 4;
                     continue;
                 } else {
-                    return Err(format!(
-                        "Yanlış karakter kullanımı: {:?}, konum: {}",
-                        chars[i..].iter().collect::<String>(),
-                        i + 1
-                    ));
+                    return Err(format!("null bekleniyordu, konum: {}", i + 1));
                 }
             }
             ' ' | '\n' | '\t' | '\r' => {
@@ -256,23 +232,23 @@ mod tests {
     fn test_tokenizer_over_size() {
         assert_eq!(
             tokenizer("truelds"),
-            Err("Tanınmayan literal kullanımı: 'l', konum: 5".to_string())
+            Err("true bekleniyordu, konum: 1".to_string())
         );
     }
 
     #[test]
-    fn test_tokenizer_same_lietarel_twice() {
+    fn test_tokenizer_same_literal_twice() {
         assert_eq!(
             tokenizer("truetrue"),
-            Err("Tanınmayan literal kullanımı: 't', konum: 5".to_string())
+            Err("true bekleniyordu, konum: 1".to_string())
         );
     }
 
     #[test]
-    fn test_tokenizer_lietral_with_number_ending() {
+    fn test_tokenizer_literal_with_number_ending() {
         assert_eq!(
             tokenizer("true123"),
-            Err("Tanınmayan literal kullanımı: '1', konum: 5".to_string())
+            Err("true bekleniyordu, konum: 1".to_string())
         );
     }
 
@@ -280,7 +256,7 @@ mod tests {
     fn test_tokenizer_not_finished_true() {
         assert_eq!(
             tokenizer("tru"),
-            Err("Yanlış karakter kullanımı: ['t', 'r', 'u'], konum: 1".to_string())
+            Err("true bekleniyordu, konum: 1".to_string())
         );
     }
 
@@ -288,7 +264,7 @@ mod tests {
     fn test_tokenizer_not_finished_false() {
         assert_eq!(
             tokenizer("fals"),
-            Err("Yanlış karakter kullanımı: ['f', 'a', 'l', 's'], konum: 1".to_string())
+            Err("false bekleniyordu, konum: 1".to_string())
         );
     }
 
@@ -296,7 +272,7 @@ mod tests {
     fn test_tokenizer_not_finished_null() {
         assert_eq!(
             tokenizer("nul"),
-            Err("Yanlış karakter kullanımı: ['n', 'u', 'l'], konum: 1".to_string())
+            Err("null bekleniyordu, konum: 1".to_string())
         );
     }
 
