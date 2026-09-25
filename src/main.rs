@@ -43,7 +43,7 @@ fn tokenizer(input: &str) -> Result<Vec<Token>, String> {
                     match maybe {
                         Some(c) => {
                             if !STRUCTURAL.contains(&c) && !WHITESPACE.contains(&c) {
-                                return Err(format!("true bekleniyordu, konum: {}", i + 1));
+                                return Err(format!("Hatalı karakter {}, konum: {}", c, i + 5));
                             }
                         }
                         None => {}
@@ -61,7 +61,7 @@ fn tokenizer(input: &str) -> Result<Vec<Token>, String> {
                     match maybe {
                         Some(c) => {
                             if !STRUCTURAL.contains(&c) && !WHITESPACE.contains(&c) {
-                                return Err(format!("false bekleniyordu, konum: {}", i + 1));
+                                return Err(format!("Hatalı karakter {}, konum: {}", c, i + 6));
                             }
                         }
                         None => {}
@@ -79,7 +79,7 @@ fn tokenizer(input: &str) -> Result<Vec<Token>, String> {
                     match maybe {
                         Some(c) => {
                             if !STRUCTURAL.contains(&c) && !WHITESPACE.contains(&c) {
-                                return Err(format!("null bekleniyordu, konum: {}", i + 1));
+                                return Err(format!("Hatalı karakter {}, konum: {}", c, i + 5));
                             }
                         }
                         None => {}
@@ -229,10 +229,26 @@ mod tests {
     }
 
     #[test]
-    fn test_tokenizer_over_size() {
+    fn test_true_boundary_in_middle() {
         assert_eq!(
-            tokenizer("truelds"),
-            Err("true bekleniyordu, konum: 1".to_string())
+            tokenizer("[true, truex]"),
+            Err("Hatalı karakter x, konum: 12".to_string())
+        );
+    }
+
+    #[test]
+    fn test_null_tokenizer_over_size() {
+        assert_eq!(
+            tokenizer("nulls"),
+            Err("Hatalı karakter s, konum: 5".to_string())
+        );
+    }
+
+    #[test]
+    fn test_false_tokenizer_over_size() {
+        assert_eq!(
+            tokenizer("falseds"),
+            Err("Hatalı karakter d, konum: 6".to_string())
         );
     }
 
@@ -240,7 +256,7 @@ mod tests {
     fn test_tokenizer_same_literal_twice() {
         assert_eq!(
             tokenizer("truetrue"),
-            Err("true bekleniyordu, konum: 1".to_string())
+            Err("Hatalı karakter t, konum: 5".to_string())
         );
     }
 
@@ -248,7 +264,7 @@ mod tests {
     fn test_tokenizer_literal_with_number_ending() {
         assert_eq!(
             tokenizer("true123"),
-            Err("true bekleniyordu, konum: 1".to_string())
+            Err("Hatalı karakter 1, konum: 5".to_string())
         );
     }
 
