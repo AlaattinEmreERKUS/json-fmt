@@ -38,58 +38,22 @@ fn tokenizer(input: &str) -> Result<Vec<Token>, String> {
             ',' => tokens.push(Token::Comma),
             ':' => tokens.push(Token::Colon),
             't' => {
-                if chars[i..].starts_with(&['t', 'r', 'u', 'e']) {
-                    let maybe = chars.get(i + 4);
-                    match maybe {
-                        Some(c) => {
-                            if !STRUCTURAL.contains(&c) && !WHITESPACE.contains(&c) {
-                                return Err(format!("Hatalı karakter {}, konum: {}", c, i + 5));
-                            }
-                        }
-                        None => {}
-                    }
-                    tokens.push(Token::True);
-                    i += 4;
-                    continue;
-                } else {
-                    return Err(format!("true bekleniyordu, konum: {}", i + 1));
-                }
+                let end = literal_to_token(&chars, &['t', 'r', 'u', 'e'], i)?;
+                tokens.push(Token::True);
+                i = end;
+                continue;
             }
             'f' => {
-                if chars[i..].starts_with(&['f', 'a', 'l', 's', 'e']) {
-                    let maybe = chars.get(i + 5);
-                    match maybe {
-                        Some(c) => {
-                            if !STRUCTURAL.contains(&c) && !WHITESPACE.contains(&c) {
-                                return Err(format!("Hatalı karakter {}, konum: {}", c, i + 6));
-                            }
-                        }
-                        None => {}
-                    }
-                    tokens.push(Token::False);
-                    i += 5;
-                    continue;
-                } else {
-                    return Err(format!("false bekleniyordu, konum: {}", i + 1));
-                }
+                let end = literal_to_token(&chars, &['f', 'a', 'l', 's', 'e'], i)?;
+                tokens.push(Token::False);
+                i = end;
+                continue;
             }
             'n' => {
-                if chars[i..].starts_with(&['n', 'u', 'l', 'l']) {
-                    let maybe = chars.get(i + 4);
-                    match maybe {
-                        Some(c) => {
-                            if !STRUCTURAL.contains(&c) && !WHITESPACE.contains(&c) {
-                                return Err(format!("Hatalı karakter {}, konum: {}", c, i + 5));
-                            }
-                        }
-                        None => {}
-                    }
-                    tokens.push(Token::Null);
-                    i += 4;
-                    continue;
-                } else {
-                    return Err(format!("null bekleniyordu, konum: {}", i + 1));
-                }
+                let end = literal_to_token(&chars, &['n', 'u', 'l', 'l'], i)?;
+                tokens.push(Token::Null);
+                i = end;
+                continue;
             }
             ' ' | '\n' | '\t' | '\r' => {
                 i += 1;
@@ -106,6 +70,31 @@ fn tokenizer(input: &str) -> Result<Vec<Token>, String> {
         i += 1;
     }
     Ok(tokens)
+}
+
+fn literal_kontrol(chars: &[char], word: &[char], i: usize) -> Result<usize, String> {
+    if chars[i..].starts_with(word) {
+        let maybe = chars.get(i + word.len());
+        match maybe {
+            Some(c) => {
+                if !STRUCTURAL.contains(&c) && !WHITESPACE.contains(&c) {
+                    return Err(format!(
+                        "Hatalı karakter {}, konum: {}",
+                        c,
+                        i + word.len() + 1
+                    ));
+                }
+            }
+            None => {}
+        }
+        Ok(i + word.len())
+    } else {
+        Err(format!(
+            "{} bekleniyordu, konum: {}",
+            word.iter().collect::<String>(),
+            i + 1
+        ))
+    }
 }
 
 #[cfg(test)]
