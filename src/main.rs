@@ -1,4 +1,4 @@
-use std::{format, println};
+use std::{format, println, usize};
 
 #[derive(Debug, PartialEq)]
 enum Token {
@@ -19,7 +19,7 @@ const STRUCTURAL: &[char] = &['{', '}', '[', ']', ',', ':'];
 const WHITESPACE: &[char] = &[' ', '\t', '\n', '\r'];
 
 fn main() {
-    let input = String::from("");
+    let input = String::from("\"abc");
     let tokens = tokenizer(&input);
     println!("{:?}", tokens);
 }
@@ -37,20 +37,27 @@ fn tokenizer(input: &str) -> Result<Vec<Token>, String> {
             ']' => tokens.push(Token::RightBracket),
             ',' => tokens.push(Token::Comma),
             ':' => tokens.push(Token::Colon),
+            '\"' => {
+                let tuple = str_kontrol(&chars, i)?;
+                let word = tuple.0;
+                i = tuple.1 + 1;
+                tokens.push(Token::String(word));
+                continue;
+            }
             't' => {
-                let end = literal_to_token(&chars, &['t', 'r', 'u', 'e'], i)?;
+                let end = literal_kontrol(&chars, &['t', 'r', 'u', 'e'], i)?;
                 tokens.push(Token::True);
                 i = end;
                 continue;
             }
             'f' => {
-                let end = literal_to_token(&chars, &['f', 'a', 'l', 's', 'e'], i)?;
+                let end = literal_kontrol(&chars, &['f', 'a', 'l', 's', 'e'], i)?;
                 tokens.push(Token::False);
                 i = end;
                 continue;
             }
             'n' => {
-                let end = literal_to_token(&chars, &['n', 'u', 'l', 'l'], i)?;
+                let end = literal_kontrol(&chars, &['n', 'u', 'l', 'l'], i)?;
                 tokens.push(Token::Null);
                 i = end;
                 continue;
@@ -97,8 +104,23 @@ fn literal_kontrol(chars: &[char], word: &[char], i: usize) -> Result<usize, Str
     }
 }
 
+fn str_kontrol(chars: &[char], i: usize) -> Result<(String, usize), String> {
+    let mut word = String::new();
+    let mut j = i + 1;
+    if !chars[j..].contains(&'\"') {
+        return Err(format!("{} bekleniyordu, konum: {}", '"', chars.len() - 1));
+    }
+    while chars[j] != '\"' {
+        word.push(chars[j]);
+        j += 1;
+    }
+    Ok((word, j))
+}
+
 #[cfg(test)]
 mod tests {
+    use std::assert_eq;
+
     use super::*;
 
     #[test]
