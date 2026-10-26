@@ -19,7 +19,7 @@ const STRUCTURAL: &[char] = &['{', '}', '[', ']', ',', ':'];
 const WHITESPACE: &[char] = &[' ', '\t', '\n', '\r'];
 
 fn main() {
-    let input = String::from("\"abc");
+    let input = String::from("\"\"");
     let tokens = tokenizer(&input);
     println!("{:?}", tokens);
 }
@@ -38,9 +38,8 @@ fn tokenizer(input: &str) -> Result<Vec<Token>, String> {
             ',' => tokens.push(Token::Comma),
             ':' => tokens.push(Token::Colon),
             '\"' => {
-                let tuple = str_kontrol(&chars, i)?;
-                let word = tuple.0;
-                i = tuple.1 + 1;
+                let (word, end) = str_kontrol(&chars, i)?;
+                i = end;
                 tokens.push(Token::String(word));
                 continue;
             }
@@ -108,18 +107,18 @@ fn str_kontrol(chars: &[char], i: usize) -> Result<(String, usize), String> {
     let mut word = String::new();
     let mut j = i + 1;
     if !chars[j..].contains(&'\"') {
-        return Err(format!("{} bekleniyordu, konum: {}", '"', chars.len() - 1));
+        return Err(format!("{} bekleniyordu, konum: {}", '"', chars.len()));
     }
     while chars[j] != '\"' {
         word.push(chars[j]);
         j += 1;
     }
-    Ok((word, j))
+    Ok((word, j + 1))
 }
 
 #[cfg(test)]
 mod tests {
-    use std::assert_eq;
+    use std::{assert_eq, vec};
 
     use super::*;
 
@@ -333,6 +332,44 @@ mod tests {
                 Token::RightBrace,
                 Token::RightBracket
             ])
+        );
+    }
+
+    #[test]
+    fn str_kontrol_with_real_string() {
+        assert_eq!(
+            tokenizer(&"\"abc\""),
+            Ok(vec![Token::String(String::from("abc"))])
+        );
+    }
+
+    #[test]
+    fn str_kontrol_with_brackets_and_string() {
+        assert_eq!(
+            tokenizer(&"[\"a\",\"b\"]"),
+            Ok(vec![
+                Token::LeftBracket,
+                Token::String(String::from("a")),
+                Token::Comma,
+                Token::String(String::from("b")),
+                Token::RightBracket
+            ])
+        )
+    }
+
+    #[test]
+    fn str_kontrol_with_blank_string() {
+        assert_eq!(
+            tokenizer(&"\"\""),
+            Ok(vec![Token::String(String::from(""))])
+        )
+    }
+
+    #[test]
+    fn str_kontrol_with_unclosed_string() {
+        assert_eq!(
+            tokenizer(&"\"abc"),
+            Err("\" bekleniyordu, konum: 4".to_string())
         );
     }
 }
