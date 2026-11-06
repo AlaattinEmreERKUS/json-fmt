@@ -107,7 +107,7 @@ fn str_kontrol(chars: &[char], i: usize) -> Result<(String, usize), String> {
     let mut word = String::new();
     let mut j = i + 1;
     if !chars[j..].contains(&'\"') {
-        return Err(format!("{} bekleniyordu, konum: {}", '"', chars.len()));
+        return Err(format!("{} bekleniyordu, konum: {}", '"', chars.len() + 1));
     }
     while chars[j] != '\"' {
         word.push(chars[j]);
@@ -369,7 +369,7 @@ mod tests {
     fn str_kontrol_with_unclosed_string() {
         assert_eq!(
             tokenizer(&"\"abc"),
-            Err("\" bekleniyordu, konum: 4".to_string())
+            Err("\" bekleniyordu, konum: 5".to_string())
         );
     }
 }
